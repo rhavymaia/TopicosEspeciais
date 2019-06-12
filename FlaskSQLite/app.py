@@ -48,10 +48,6 @@ def getAluno(id):
         SELECT * FROM tb_aluno WHERE id_aluno = ?;
     """, (id, ))
 
-    # iterando os registros.
-    #itens = []
-    #for linha in cursor.fetchall():
-    #    itens.append(dict_factory(linha, cursor))
     linha = cursor.fetchone()
     aluno = {
         "id_aluno":linha[0],
@@ -69,11 +65,11 @@ def getAluno(id):
 @app.route("/aluno", methods=['POST'])
 def setAluno():
     # Recuperando dados do JSON.
-    json = request.get_json()
-    nome = json['nome']
-    endereco = json['endereco']
-    nascimento = json['nascimento']
-    matricula = json['matricula']
+    aluno = request.get_json()
+    nome = aluno['nome']
+    endereco = aluno['endereco']
+    nascimento = aluno['nascimento']
+    matricula = aluno['matricula']
 
     # Inserir dados na Base.
     conn = sqlite3.connect(DATABASE_NAME)
@@ -84,10 +80,24 @@ def setAluno():
     """, (nome, endereco, nascimento, matricula))
     conn.commit()
     conn.close()
+
     # Identificador do último registro inserido.
     id = cursor.lastrowid
+    aluno["id"] = id
 
-    return ("Identificador: %s"%(id), 200)
+    return jsonify(aluno)
+
+@app.route("/aluno", methods=['PUT'])
+def updateAluno():
+    print("Atualizar aluno.")
+    # Receber o JSON.
+
+    # Buscar o aluno pelo "id".
+
+    # Atualizar os dados caso o aluno seja encontrado através do "id".
+
+    #Retornar o JSON do aluno atualizado.
+    return ("PUT", 200)
 
 def dict_factory(linha, cursor):
     dicionario = {}
