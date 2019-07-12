@@ -87,17 +87,50 @@ def setAluno():
 
     return jsonify(aluno)
 
-@app.route("/aluno", methods=['PUT'])
-def updateAluno():
-    print("Atualizar aluno.")
+@app.route("/aluno/<int:id>", methods=['PUT'])
+def updateAluno(id):
     # Receber o JSON.
+    aluno = request.get_json()
+    nome = aluno['nome']
+    endereco = aluno['endereco']
+    nascimento = aluno['nascimento']
+    matricula = aluno['matricula']
 
     # Buscar o aluno pelo "id".
+    conn = sqlite3.connect(DATABASE_NAME)
+    cursor = conn.cursor()
 
-    # Atualizar os dados caso o aluno seja encontrado através do "id".
+    # Executar a consulta de pesquisa.​​
+    cursor.execute("""
+        SELECT * FROM tb_aluno WHERE id_aluno = ?;
+    """, (id, ))
+
+    data = cursor.fetchone()
+
+    if data is not None:
+        # Atualizar os dados caso o aluno seja encontrado através do "id".
+        cursor.execute("""
+            UPDATE tb_aluno
+            SET nome=?, endereco=?, nascimento=?, matricula=?
+            WHERE id_aluno = ?;
+        """, (nome, endereco, nascimento, matricula, id))
+        conn.commit()
+    else:
+        print("Inserindo")
+        # Inserir novo registro.
+        cursor.execute("""
+            INSERT INTO tb_aluno(nome, endereco, nascimento, matricula)
+            VALUES(?, ?, ?, ?);
+        """, (nome, endereco, nascimento, matricula))
+        conn.commit()
+        # Identificador do último registro inserido.
+        id = cursor.lastrowid
+        aluno["id"] = id
+
+    conn.close()
 
     #Retornar o JSON do aluno atualizado.
-    return ("PUT", 200)
+    return jsonify(aluno)
 
 def dict_factory(linha, cursor):
     dicionario = {}
