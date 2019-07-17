@@ -1,16 +1,26 @@
 from flask import Flask
 from flask import request
 from flask import jsonify
+import logging
 
 import sqlite3
 
 # Inicializando a aplicação.
 app = Flask(__name__)
 
+# Logging
+formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+handler = logging.FileHandler("escolaapp.log")
+handler.setFormatter(formatter)
+logger = app.logger
+logger.addHandler(handler)
+logger.setLevel(logging.INFO)
+
 DATABASE_NAME = 'escola.db'
 
 @app.route("/alunos")
 def getAlunos():
+    logger.info("Listando alunos.")
     # abrir conexão com o banco de dados.
     conn = sqlite3.connect(DATABASE_NAME)
     cursor = conn.cursor()
