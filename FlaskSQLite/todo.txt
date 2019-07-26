@@ -1,0 +1,4 @@
+# Logging
+# Criar entidades.
+# Criar DAOs
+# Validação
