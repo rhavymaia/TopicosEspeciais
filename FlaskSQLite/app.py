@@ -1,6 +1,7 @@
 from flask import Flask
 from flask import request
 from flask import jsonify
+from flask_json_schema import JsonSchema, JsonValidationError
 import sqlite3
 import logging
 
@@ -19,6 +20,21 @@ logger = app.logger
 logger.addHandler(handler)
 logger.setLevel(logging.INFO)
 
+# Validação
+schema = JsonSchema()
+schema.init_app(app)
+
+todo_schema = {
+    'required': ['todo'],
+    'properties': {
+        'todo': { 'type': 'string' },
+        'priority': { 'type': 'integer' },
+    }
+}
+
+todos = []
+
+# Banco de dados.
 DATABASE_NAME = 'escola_2.db'
 
 @app.route("/alunos")
@@ -167,6 +183,11 @@ def not_found(error=None):
     resp.status_code = 404
 
     return resp
+
+@app.errorhandler(JsonValidationError)
+def validation_error(e):
+    return jsonify({ 'error': e.message, 'errors': [validation_error.message for validation_error  in e.errors]})
+
 
 if(__name__ == '__main__'):
     #dao = AlunoDAO()
