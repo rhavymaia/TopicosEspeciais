@@ -24,15 +24,15 @@ logger.setLevel(logging.INFO)
 schema = JsonSchema()
 schema.init_app(app)
 
-todo_schema = {
-    'required': ['todo'],
+aluno_schema = {
+    'required': ['nome', 'endereco', 'nascimento', 'matricula'],
     'properties': {
-        'todo': { 'type': 'string' },
-        'priority': { 'type': 'integer' },
+        'nome': {'type': 'string'},
+        'endereco': {'type': 'string'},
+        'nascimento': {'type': 'string'},
+        'matricula': {'type': 'string'},
     }
 }
-
-todos = []
 
 # Banco de dados.
 DATABASE_NAME = 'escola_2.db'
@@ -96,6 +96,7 @@ def getAluno(id):
     return jsonify(aluno)
 
 @app.route("/aluno", methods=['POST'])
+@schema.validate(aluno_schema)
 def setAluno():
     # Recuperando dados do JSON.
     alunoJson = request.get_json()
