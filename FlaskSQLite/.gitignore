@@ -1,3 +1,5 @@
 flask_env/
 __pycache__/
 *.pyc
+*.db
+*.log
