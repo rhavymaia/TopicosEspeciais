@@ -25,12 +25,12 @@ schema = JsonSchema()
 schema.init_app(app)
 
 aluno_schema = {
-    'required': ['nome', 'endereco', 'nascimento', 'matricula'],
+    'required': ['nome', 'nascimento', 'matricula', 'cpf'],
     'properties': {
         'nome': {'type': 'string'},
         'endereco': {'type': 'string'},
         'nascimento': {'type': 'string'},
-        'matricula': {'type': 'string'},
+        'matricula': {'type': 'string'}
     }
 }
 
@@ -191,7 +191,4 @@ def validation_error(e):
 
 
 if(__name__ == '__main__'):
-    #dao = AlunoDAO()
-    #print(dao.listar())
-
     app.run(host='0.0.0.0', debug=True, use_reloader=True)
