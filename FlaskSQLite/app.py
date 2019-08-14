@@ -98,71 +98,82 @@ def getAluno(id):
 @app.route("/aluno", methods=['POST'])
 @schema.validate(aluno_schema)
 def setAluno():
-    # Recuperando dados do JSON.
-    alunoJson = request.get_json()
-    nome = alunoJson['nome']
-    endereco = alunoJson['endereco']
-    nascimento = alunoJson['nascimento']
-    matricula = alunoJson['matricula']
-    aluno = Aluno(nome, endereco, nascimento, matricula)
+    try:
+        # Recuperando dados do JSON.
+        alunoJson = request.get_json()
+        nome = alunoJson['nome']
+        endereco = alunoJson['endereco']
+        nascimento = alunoJson['nascimento']
+        matricula = alunoJson['matricula']
+        aluno = Aluno(nome, endereco, nascimento, matricula)
 
-    # Inserir dados na Base.
-    conn = sqlite3.connect(DATABASE_NAME)
-    cursor = conn.cursor()
-    cursor.execute("""
-        INSERT INTO tb_aluno(nome, endereco, nascimento, matricula)
-        VALUES(?, ?, ?, ?);
-    """, (nome, endereco, nascimento, matricula))
-    conn.commit()
-    conn.close()
-
-    # Identificador do último registro inserido.
-    id = cursor.lastrowid
-    aluno["id"] = id
-
-    return jsonify(aluno)
-
-@app.route("/aluno/<int:id>", methods=['PUT'])
-def updateAluno(id):
-    # Receber o JSON.
-    aluno = request.get_json()
-    nome = aluno['nome']
-    endereco = aluno['endereco']
-    nascimento = aluno['nascimento']
-    matricula = aluno['matricula']
-
-    # Buscar o aluno pelo "id".
-    conn = sqlite3.connect(DATABASE_NAME)
-    cursor = conn.cursor()
-
-    # Executar a consulta de pesquisa.​​
-    cursor.execute("""
-        SELECT * FROM tb_aluno WHERE id_aluno = ?;
-    """, (id, ))
-
-    data = cursor.fetchone()
-
-    if data is not None:
-        # Atualizar os dados caso o aluno seja encontrado através do "id".
-        cursor.execute("""
-            UPDATE tb_aluno
-            SET nome=?, endereco=?, nascimento=?, matricula=?
-            WHERE id_aluno = ?;
-        """, (nome, endereco, nascimento, matricula, id))
-        conn.commit()
-    else:
-        print("Inserindo")
-        # Inserir novo registro.
+        # Inserir dados na Base.
+        conn = sqlite3.connect(DATABASE_NAME)
+        cursor = conn.cursor()
         cursor.execute("""
             INSERT INTO tb_aluno(nome, endereco, nascimento, matricula)
             VALUES(?, ?, ?, ?);
         """, (nome, endereco, nascimento, matricula))
         conn.commit()
+        conn.close()
+
         # Identificador do último registro inserido.
         id = cursor.lastrowid
         aluno["id"] = id
 
-    conn.close()
+    except (sqlite3.Error, Exception) as e:
+        logger.error("Algum problema aconteceu.")
+        logger.error("Exceção: %s" % e)
+
+    return jsonify(aluno)
+
+@app.route("/aluno/<int:id>", methods=['PUT'])
+def updateAluno(id):
+    try:
+        # Receber o JSON.
+        aluno = request.get_json()
+        nome = aluno['nome']
+        endereco = aluno['endereco']
+        nascimento = aluno['nascimento']
+        matricula = aluno['matricula']
+
+        # Buscar o aluno pelo "id".
+        conn = sqlite3.connect(DATABASE_NAME)
+        cursor = conn.cursor()
+
+        # Executar a consulta de pesquisa.​​
+        cursor.execute("""
+            SELECT * FROM tb_aluno WHERE id_aluno = ?;
+        """, (id, ))
+
+        data = cursor.fetchone()
+
+        if data is not None:
+            # Atualizar os dados caso o aluno seja encontrado através do "id".
+            cursor.execute("""
+                UPDATE tb_aluno
+                SET nome=?, endereco=?, nascimento=?, matricula=?
+                WHERE id_aluno = ?;
+            """, (nome, endereco, nascimento, matricula, id))
+            conn.commit()
+        else:
+            print("Inserindo")
+            # Inserir novo registro.
+            cursor.execute("""
+                INSERT INTO tb_aluno(nome, endereco, nascimento, matricula)
+                VALUES(?, ?, ?, ?);
+            """, (nome, endereco, nascimento, matricula))
+            conn.commit()
+            # Identificador do último registro inserido.
+            id = cursor.lastrowid
+            aluno["id"] = id
+
+    except (sqlite3.Error, Exception) as e:
+        logger.error("Algum problema aconteceu.")
+        logger.error("Exceção: %s" % e)
+    finally:
+        if conn:
+            conn.close()
 
     #Retornar o JSON do aluno atualizado.
     return jsonify(aluno)
