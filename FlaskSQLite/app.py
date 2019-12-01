@@ -1,6 +1,12 @@
 from flask import Flask
 from flask import request
 from flask import jsonify
+'''
+Adicionar a importação do CORS e não esquecer de fazer o pip no flask-env:
+$ pip install -U flask-cors
+'''
+from flask_cors import CORS
+
 from flask_json_schema import JsonSchema, JsonValidationError
 import sqlite3
 import logging
@@ -200,6 +206,10 @@ def not_found(error=None):
 def validation_error(e):
     return jsonify({ 'error': e.message, 'errors': [validation_error.message for validation_error  in e.errors]})
 
+'''
+    Instaciar o objeto CORS passando como parâmetros a app e as urls permitidas.
+'''
+cors = CORS(app, resources={r"/*": {"origins": "*"}})
 
 if(__name__ == '__main__'):
     app.run(host='0.0.0.0', debug=True, use_reloader=True)
